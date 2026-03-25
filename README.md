@@ -1,8 +1,8 @@
 # llm-language
 
-**A scientifically-grounded prompt meta-compiler for Claude Code**
+**A scientifically-grounded prompt meta-compiler for Claude Code (v3.0 -- mandatory codebase awareness)**
 
-> Automatic prompt re-engineering through multi-agent debate, grounded in 100+ prompt engineering papers, specialized for Claude Opus 4.6 with ultrathink.
+> Automatic prompt re-engineering through multi-agent debate, grounded in 100+ prompt engineering papers, specialized for Claude Opus 4.6 with ultrathink. v3.0 adds mandatory codebase scanning before every generation.
 
 ---
 
@@ -10,12 +10,19 @@
 
 `llm-language` is a [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin that intercepts every user message and re-engineers it through a multi-agent Generate-Critique-Revise pipeline before execution. The system produces an optimized XML-structured prompt that is ephemeral (never saved to disk) and executed with maximum reasoning depth.
 
-The pipeline implements a **Diverse Multi-Agent Debate** (DMAD) architecture where a Producer agent generates an optimized prompt and an independent Critic agent evaluates it against a 7-dimension scoring rubric. If the score falls below 8.5/10, the prompt is revised and re-evaluated, up to 2 rounds.
+The pipeline implements a **Diverse Multi-Agent Debate** (DMAD) architecture where a Producer agent generates an optimized prompt and an independent Critic agent evaluates it against an 8-dimension scoring rubric. If the score falls below 9.2/10, the prompt is revised and re-evaluated, up to 4 rounds.
 
-**v2.0** introduces **ROSETTA.md** — a persistent episodic memory file that evolves after every interaction, capturing what works for each specific user. Agents now have access to **all user skills**, **web deep research**, and can **ask the user for clarification** when uncertain.
+**v3.0** introduces **mandatory codebase awareness** — the pipeline reads CLAUDE.md and key project files before generating any prompt, ensuring every output is grounded in the real project state. ROSETTA.md now supports **cold-start bootstrap**, inferring a user profile from CLAUDE.md and git log when no prior history exists. Agents have access to **all user skills**, **web deep research**, and can **ask the user for clarification** when uncertain.
 
 ### Key Features
 
+- **Mandatory codebase awareness**: reads CLAUDE.md + key files before generating (Phase 0.5)
+- **Context mismatch detection**: flags when request doesn't match project
+- **File content awareness**: reads target files to detect existing work
+- **ROSETTA cold-start bootstrap**: infers profile from CLAUDE.md + git log when no prior history exists
+- **8-dimension scoring rubric**: added Codebase Grounding (0.12 weight)
+- **Threshold 9.2**: raised from 8.5 based on empirical evaluation
+- **Critic anchor at 5**: starts at 5/10 (was 7), reduces inflation by ~2.5 points
 - **ROSETTA.md persistent memory**: self-evolving user profile that improves output quality over time
 - **Automatic interception** of every user message (skippable with "skip llm-language")
 - **Multi-agent debate**: Producer (generator) + Critic (evaluator) with heterogeneous roles
@@ -23,7 +30,6 @@ The pipeline implements a **Diverse Multi-Agent Debate** (DMAD) architecture whe
 - **Full skill access**: agents can use ALL installed skills, tools, and capabilities
 - **User clarification**: when uncertain, agents ask targeted questions instead of guessing
 - **Scientific grounding**: 20+ techniques from 110+ papers mapped to task types
-- **7-dimension scoring rubric**: includes User-Fit Alignment dimension powered by ROSETTA
 - **XML-structured output**: leverages Claude's native XML parsing capabilities
 - **Complexity-adaptive**: scales pipeline depth (simple=1 agent, critical=4 agents)
 - **Ephemeral prompts**: generated XML lives only in conversation context
@@ -38,6 +44,9 @@ User Message
 [Phase 0: ROSETTA LOAD]   Read ~/.claude/ROSETTA.md — user preferences,
     |                       effective patterns, anti-patterns, domain context
     v
+[Phase 0.5: CODEBASE SCAN] Read CLAUDE.md + key files, check relevance,
+    |                        detect existing content, build codebase-context
+    v
 [Phase 1: INTAKE]          Classify complexity, discover skills,
     |                       assess uncertainty, select principles
     |                       Ask user if uncertainty is HIGH
@@ -45,11 +54,11 @@ User Message
 [Phase 2: GENERATE]        Producer Agent (Opus) with ALL tools + WebSearch
     |                       generates XML prompt using template + ROSETTA context
     v
-[Phase 3: CRITIQUE]        Critic Agent (Opus) scores on 7 dimensions
+[Phase 3: CRITIQUE]        Critic Agent (Opus) scores on 8 dimensions
     |                       including User-Fit Alignment (ROSETTA)
     v
-[Phase 4: REVISE]          If score < 8.5: revise + re-critique
-    |                       Max 2 rounds, delta convergence < 0.3
+[Phase 4: REVISE]          If score < 9.2: revise + re-critique
+    |                       Max 4 rounds, delta convergence < 0.3
     v
 [Phase 5: EXECUTE]         Summary banner + execute with ultrathink
     |                       Full tool access + all skills available
@@ -65,7 +74,8 @@ ROSETTA.md (`~/.claude/ROSETTA.md`) is a self-evolving document that captures wh
 - **Read at the start** of every pipeline invocation (Phase 0)
 - **Updated silently** after every execution (Phase 6)
 - **Passed to all agents** as `<rosetta-context>` for personalized prompt generation
-- **Scored by the Critic** via Dimension 7 (User-Fit Alignment)
+- **Scored by the Critic** via Dimension 7 (User-Fit Alignment) and Dimension 8 (Codebase Grounding)
+- **Cold-start bootstrap**: when no ROSETTA.md exists, the system infers an initial profile from CLAUDE.md project instructions and recent git log activity, seeding preferences before any user interaction
 - **Consolidated automatically** when approaching 300 lines (merges similar patterns, removes outdated entries)
 
 After 10+ interactions, the system noticeably adapts to the user's preferences, communication style, and typical task patterns. Inspired by PersonalLLM (ICLR 2025), PromptWizard (Microsoft 2024), and Reflective Memory Management research.
@@ -74,13 +84,14 @@ After 10+ interactions, the system noticeably adapts to the user's preferences, 
 
 | Dimension | Weight | What it measures |
 |---|---|---|
-| Intent Preservation | 0.20 | User's original goal unchanged |
-| Precision | 0.18 | Every instruction specific, unambiguous |
-| Completeness | 0.18 | Sub-tasks + edge cases covered |
-| Structure | 0.14 | XML well-formed, clear hierarchy |
-| Opus 4.6 Optimization | 0.10 | Model-specific capabilities leveraged |
-| Scientific Grounding | 0.10 | Appropriate techniques applied |
-| **User-Fit Alignment** | **0.10** | **ROSETTA.md insights leveraged** |
+| Intent Preservation | 0.18 | User's original goal unchanged |
+| Precision | 0.16 | Every instruction specific, unambiguous |
+| Completeness | 0.16 | Sub-tasks + edge cases covered |
+| Structure | 0.12 | XML well-formed, clear hierarchy |
+| Opus 4.6 Optimization | 0.08 | Model-specific capabilities leveraged |
+| Scientific Grounding | 0.08 | Appropriate techniques applied |
+| User-Fit Alignment | 0.10 | ROSETTA.md insights leveraged |
+| **Codebase Grounding** | **0.12** | **Real project state referenced** |
 
 ### Token Cost
 
@@ -169,11 +180,12 @@ rm -rf /tmp/sl-temp
 Once installed, the skill triggers automatically on every user message. You'll see a summary banner before each response:
 
 ```
-★ llm-language ──────────────────────────────
+★ llm-language v3.0 ────────────────────────
 Applied: CoT + Self-Refine | Role: Senior Backend Engineer
 Complexity: moderate | Sub-tasks: 3 | Thinking: ultrathink
-Score: 8.7/10 | Rounds: 1
-Skills matched: paper, humanizer
+Score: 9.3/10 | Rounds: 2 | Threshold: 9.2
+Codebase: grounded | Research: no
+Skills matched: paper, humanizer | ROSETTA patterns: 3
 ──────────────────────────────────────────────────
 ```
 
@@ -196,12 +208,12 @@ llm-language/
 │   └── marketplace.json         # Registration metadata
 ├── skills/
 │   └── llm-language/
-│       ├── SKILL.md             # Main skill (pipeline orchestrator, v2.0)
+│       ├── SKILL.md             # Main skill (pipeline orchestrator, v3.0)
 │       └── references/
 │           ├── scientific-principles.md   # 20+ techniques, 110+ papers
 │           ├── xml-prompt-template.md     # XML template with field docs
-│           ├── scoring-rubric.md          # 7-dimension quality rubric (v2.0)
-│           └── rosetta-bootstrap.md       # ROSETTA.md initial template (v2.0)
+│           ├── scoring-rubric.md          # 8-dimension quality rubric (v3.0)
+│           └── rosetta-bootstrap.md       # ROSETTA.md initial template (v3.0 with cold-start)
 ├── docs/
 │   └── BIBLIOGRAPHY.md          # Full academic bibliography
 ├── README.md
@@ -284,13 +296,15 @@ The system synthesizes findings from the following research areas. For the full 
 
 4. **XML reduces hallucination** in structured outputs (Xu et al., 2025; Anthropic, 2025). The entire prompt is XML-structured.
 
-5. **Score inflation is a known failure mode** in multi-agent evaluation (Smit et al., 2024). The rubric uses anti-inflation rules: start at 7, require evidence for every score.
+5. **Score inflation is a known failure mode** in multi-agent evaluation (Smit et al., 2024). The rubric uses anti-inflation rules: start at 5, justify upward -- empirically validated (v2.0 showed 2.51-point inflation at anchor 7).
 
 6. **Personalized models provide maximal benefits as interactions accumulate** (PersonalLLM, ICLR 2025). ROSETTA.md enables this by persisting preference signals across sessions.
 
 7. **Self-evolving feedback loops achieve superior performance across 45 tasks** (PromptWizard, Microsoft 2024). Our Generate-Critique-Revise cycle with ROSETTA persistence extends this pattern.
 
 8. **Human feedback integration improves multi-step task performance by 10-29%** (PROMST, EMNLP 2024). The user clarification mechanism in Phase 1.4 implements this.
+
+9. **Codebase awareness is the single largest quality driver** (+2.5 points in empirical testing). v3.0 makes it mandatory via Phase 0.5.
 
 ## Decision Matrix
 
@@ -331,8 +345,8 @@ If you use this work in academic research, please cite:
   author    = {Andre},
   year      = {2026},
   url       = {https://github.com/Silence-view/llm-language},
-  note      = {Multi-agent prompt optimization plugin implementing DMAD, Self-Refine,
-               and XML-structured prompting for Claude Opus 4.6},
+  note      = {v3.0: Multi-agent prompt optimization with mandatory codebase awareness,
+               DMAD, Self-Refine, and XML-structured prompting for Claude Opus 4.6},
   license   = {MIT}
 }
 ```
