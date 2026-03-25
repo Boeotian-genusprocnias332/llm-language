@@ -1,30 +1,35 @@
 ---
 name: llm-language
-version: "2.0"
+version: "3.0"
 user-invocable: true
 description: >
   Use when user explicitly invokes "/llm-language" or says "llm-language",
   "optimize prompt", "re-engineer prompt", "massima precisione", "maximum
   quality", "ottimizza il prompt". This skill re-engineers the user's
   prompt through multi-agent debate with scientific optimization,
-  ROSETTA.md adaptive memory, web deep research, and full skill access.
-  Opus 4.6 + ultrathink. NOTE: ROSETTA.md is updated passively in the
-  background to learn user style even when the skill is NOT invoked.
+  ROSETTA.md adaptive memory, mandatory codebase awareness, web deep
+  research, and full skill access. Opus 4.6 + ultrathink. NOTE:
+  ROSETTA.md is updated passively in the background to learn user style
+  even when the skill is NOT invoked.
 ---
 
-# llm-language v2.0
+# llm-language v3.0
 
 ## Overview
 
-A self-evolving prompt meta-compiler that re-engineers user messages through a multi-agent debate process grounded in 100+ scientific papers, producing optimized XML-structured prompts for Claude Opus 4.6 with ultrathink. The system maintains persistent memory via **ROSETTA.md** — a living document that captures what works for this specific user, evolving after every interaction to continuously improve output quality.
+A self-evolving prompt meta-compiler that re-engineers user messages through a multi-agent debate process grounded in 100+ scientific papers, producing optimized XML-structured prompts for Claude Opus 4.6 with ultrathink. The system maintains persistent memory via **ROSETTA.md** and **mandatory codebase awareness** — reading the actual project before generating prompts, ensuring every output is grounded in reality.
 
-**Core cycle:** ROSETTA Load → Intake → Generate → Critique → Revise → Execute → ROSETTA Update
+**Core cycle:** ROSETTA Load → **Codebase Scan** → Intake → Generate → Critique → Revise → Execute → ROSETTA Update
 
-**New in v2.0:**
-- Agents have access to ALL user skills, web research, and tools
-- ROSETTA.md persistent memory for cross-session learning
-- User clarification when agents are uncertain
-- Deep research capability via WebSearch for domain-specific topics
+**New in v3.0:**
+- **MANDATORY codebase awareness** — Producer reads CLAUDE.md + key files before generating (P0)
+- **ROSETTA cold-start bootstrap** — infers user profile from CLAUDE.md + git log when no ROSETTA exists
+- **Threshold raised to 9.2** — Critic must score ≥9.2 to accept (was 8.5)
+- **4 revision rounds max** — more iterations to reach higher quality bar (was 2)
+- **Critic anchor at 5** — starts at 5/10 and justifies upward (was 7), reducing inflation
+- **Context mismatch detection** — flags when the request doesn't match the current project
+- **File content awareness** — reads target file content, not just paths, to detect existing work
+- Deep research via WebSearch, full skill access, ROSETTA.md adaptive memory (from v2.0)
 
 ## When to Use
 
@@ -44,7 +49,12 @@ A self-evolving prompt meta-compiler that re-engineers user messages through a m
 
 1. Check if `~/.claude/ROSETTA.md` exists
 2. If it exists: read it fully — this is the user's preference profile, accumulated learnings, and effective patterns from all prior interactions
-3. If it does NOT exist: create it with the bootstrap template from `references/rosetta-bootstrap.md`
+3. If it does NOT exist: **COLD-START BOOTSTRAP** — before creating from template:
+   a. Read CLAUDE.md (if exists) to extract: project description, commands, architecture, conventions
+   b. Run `git log --oneline -20` to extract: recent activity, author name, commit style
+   c. Infer from conversation language: Italian/English/mixed preference
+   d. Pre-populate ROSETTA.md user profile from these signals BEFORE creating from template
+   e. Then create from `references/rosetta-bootstrap.md` with the pre-populated fields filled in
 4. Extract from ROSETTA.md:
    - **User preferences** (communication style, preferred output formats, domain expertise)
    - **Effective patterns** (techniques that scored high, approaches the user responded well to)
@@ -52,6 +62,37 @@ A self-evolving prompt meta-compiler that re-engineers user messages through a m
    - **Domain context** (projects, tech stack, common themes)
 
 This extracted context is passed to ALL subsequent agents as `<rosetta-context>`.
+
+### Phase 0.5: CODEBASE SCAN (MANDATORY — inline, no subagent)
+
+**This phase is NON-OPTIONAL. Skip it = skill failure.**
+
+Scan the current project to build a `<codebase-context>` block:
+
+1. **Read CLAUDE.md** (or AGENTS.md, GEMINI.md if present) — extract:
+   - Project description and purpose
+   - Architecture overview and module roles
+   - Critical invariants and conventions
+   - Test commands and build commands
+   - Any explicit "do NOT" rules
+
+2. **Read key project files** — use `Glob` to find entry points, then `Read` the first 50-80 lines of:
+   - Main entry point (main.py, index.ts, etc.)
+   - Config files (params.yaml, package.json, etc.)
+   - Up to 3 most-recently-modified source files (from git status)
+
+3. **Project structure inventory** — run `ls` or `Glob` on the root to understand directory layout
+
+4. **Relevance check** — compare the user's request against the project context:
+   - If the request is **RELEVANT** to the project: anchor all subsequent prompts to the codebase
+   - If the request is **IRRELEVANT** (e.g., auth system for a backtest): flag with `<context-mismatch>` and offer clarification options
+   - If **AMBIGUOUS**: use codebase to disambiguate (e.g., "questi dati" → the Parquet files in data/)
+
+5. **File content check** — if the request targets a specific file/section that may already exist:
+   - Read the target file to check if the content is already present
+   - If content exists: frame the task as "revise/extend" not "create from scratch"
+
+The `<codebase-context>` block is passed to ALL subsequent agents alongside `<rosetta-context>`.
 
 ### Phase 1: INTAKE (inline, no subagent)
 
@@ -111,6 +152,7 @@ You have access to ALL tools: WebSearch, Read, Grep, Glob, Bash, and all
 available skills. Use them when needed.
 
 Your task: transform the user's raw input into a maximally optimized XML prompt.
+You MUST ground the prompt in the actual codebase — never generate in a vacuum.
 
 RAW USER INPUT:
 <raw-input>
@@ -121,6 +163,11 @@ USER PROFILE (from ROSETTA.md):
 <rosetta-context>
 {extracted ROSETTA.md context from Phase 0}
 </rosetta-context>
+
+PROJECT CONTEXT (from Phase 0.5 codebase scan):
+<codebase-context>
+{project description, architecture, invariants, key file contents, relevance assessment}
+</codebase-context>
 
 AVAILABLE SKILLS AND AGENTS:
 <skill-registry>
@@ -169,6 +216,11 @@ CRITICAL RULES:
 - Include available skills in <tools-and-skills> only if genuinely relevant
 - The XML prompt must be immediately executable — no placeholders or TODOs
 - LEVERAGE the ROSETTA context — it contains what works for THIS user
+- GROUND every claim in codebase-context — reference real files, real invariants, real conventions
+- If the request is IRRELEVANT to the project, flag with <context-mismatch> and offer alternatives
+- If the target content ALREADY EXISTS (e.g., intro already written), frame as revise/extend
+- NEVER recommend technologies/scale beyond what the project actually uses
+- Match architecture recommendations to the ACTUAL team size, budget, and infrastructure
 ```
 
 ### Phase 3: CRITIQUE (Critic Subagent)
@@ -199,52 +251,73 @@ SCORING RUBRIC:
 {content of references/scoring-rubric.md}
 </rubric>
 
+CODEBASE CONTEXT (from Phase 0.5):
+<codebase-context>
+{project description, architecture, invariants — use this to verify the prompt is grounded}
+</codebase-context>
+
 INSTRUCTIONS:
 1. Score each of the 7 dimensions (1-10) using the anchored scale
 2. For each score, cite SPECIFIC evidence from the generated prompt
 3. For any score < 8, explain the issue and suggest a concrete fix
 4. PAY SPECIAL ATTENTION to Dimension 7 (User-Fit Alignment):
    does the prompt leverage ROSETTA.md insights effectively?
-5. Calculate the weighted score
-6. Set verdict to "accept" if weighted score >= 8.5, "revise" otherwise
-7. If you identify a CRITICAL ambiguity that neither the prompt nor ROSETTA
+5. **NEW — Dimension 8: Codebase Grounding (weight 0.12)**:
+   does the prompt reference real files, real invariants, real project state?
+   Does it match the project's actual scale (team, budget, tech stack)?
+   Does it detect context mismatch or existing content?
+6. Calculate the weighted score
+7. Set verdict to "accept" if weighted score >= **9.2**, "revise" otherwise
+8. If you identify a CRITICAL ambiguity that neither the prompt nor ROSETTA
    resolves, flag it with <needs-clarification>question</needs-clarification>
 
 OUTPUT: Return evaluation in the XML format from the rubric.
 
 ANTI-INFLATION RULES:
-- Start at 7 and adjust up/down based on evidence
+- **Start at 5 and justify UPWARD** — do not start at 7
+- "Adequate" = 6. "Good" = 7. "Strong" = 8. "Excellent" = 9. 10 = literally perfect.
 - EVERY score must cite specific content from the prompt
 - Missing required sections = automatic 4 or below for structure
-- Be genuinely critical — your job is to find weaknesses
+- Be genuinely critical — your job is to FIND WEAKNESSES, not validate
+- Cross-check EVERY claim against codebase-context: if the prompt says "use kdb+"
+  but the project uses Parquet files, that's a Codebase Grounding score of 3
+- If the prompt over-engineers beyond the project's actual scale, penalize heavily
 ```
 
 **If the Critic flags `<needs-clarification>`:** pause the pipeline and use `AskUserQuestion` to ask the user. Incorporate the answer, then re-run the Critic.
 
 ### Phase 4: REVISE + FINAL CRITIQUE
 
-**If verdict is "accept" (score >= 8.5):** Skip to Phase 5.
+**If verdict is "accept" (score >= 9.2):** Skip to Phase 5.
 
-**If verdict is "revise" (score < 8.5):**
+**If verdict is "revise" (score < 9.2):**
 
-Dispatch Producer again with critic feedback, ROSETTA context, and full tool access. The revision prompt includes the original message, previous XML, critic feedback, and ROSETTA context.
+Dispatch Producer again with critic feedback, ROSETTA context, codebase context, and full tool access. The revision prompt includes:
+- The original message
+- Previous XML prompt
+- Critic feedback (ALL dimension scores + specific suggestions)
+- ROSETTA context
+- Codebase context
+- Instruction: "Fix ONLY the dimensions scored below 9. Do not regress on dimensions already at 9+."
 
-After revision, dispatch Critic one more time for final scoring.
+After revision, dispatch Critic one more time for scoring.
 
 **Convergence rules:**
-- Maximum 2 revision rounds total
-- Stop if weighted score >= 8.5
-- Stop if score improvement < 0.3 between rounds
+- Maximum **4** revision rounds total (was 2 in v2.0)
+- Stop if weighted score >= **9.2**
+- Stop if score improvement < 0.2 between rounds (tighter convergence check)
+- If after 4 rounds the score is still < 9.2, proceed with the best-scoring version and log the gap in ROSETTA anti-patterns
 
 ### Phase 5: EXECUTE
 
 **5.1 Summary Banner**
 
 ```
-★ llm-language v2.0 ────────────────────────
+★ llm-language v3.0 ────────────────────────
 Applied: {techniques} | Role: {persona}
 Complexity: {level} | Sub-tasks: {N} | Thinking: ultrathink
-Score: {score}/10 | Rounds: {N} | Research: {yes/no}
+Score: {score}/10 | Rounds: {N} | Threshold: 9.2
+Codebase: {grounded/mismatch} | Research: {yes/no}
 Skills matched: {list} | ROSETTA patterns: {count applied}
 ──────────────────────────────────────────────────
 ```

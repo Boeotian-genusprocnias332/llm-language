@@ -1,5 +1,5 @@
 {
   "name": "llm-language",
-  "version": "2.0.0",
-  "description": "Self-evolving prompt meta-compiler with ROSETTA.md persistent memory, multi-agent debate, web deep research, and 100+ scientific papers. Produces optimized XML prompts for Claude Opus 4.6 with ultrathink."
+  "version": "3.0.0",
+  "description": "Self-evolving prompt meta-compiler with mandatory codebase awareness, ROSETTA.md persistent memory, multi-agent debate, and 100+ scientific papers. v3.0: codebase scan phase, threshold 9.2, critic anchor at 5, 8 scoring dimensions (added Codebase Grounding), max 4 revision rounds, cold-start bootstrap."
 }

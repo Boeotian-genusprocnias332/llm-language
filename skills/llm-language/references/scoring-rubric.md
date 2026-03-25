@@ -127,15 +127,35 @@ Does the prompt leverage ROSETTA.md insights to align with this specific user's 
 
 ---
 
+### 8. Codebase Grounding (Weight: 0.12) — NEW in v3.0
+
+Does the prompt reference the ACTUAL project state, not an imagined one?
+
+| Score | Anchor |
+|---|---|
+| 2 | Prompt ignores the codebase entirely. Recommends technologies/scale incompatible with the project. |
+| 4 | Prompt mentions the project domain but does not reference specific files, invariants, or conventions. |
+| 6 | Some codebase references present but superficial. Scale mostly appropriate but with mismatches. |
+| 8 | Prompt references real files, real invariants, real conventions. Scale matches actual team/budget/tech. Existing content detected and acknowledged. |
+| 10 | Deep codebase integration. Every recommendation grounded in actual project state. Context mismatches flagged. Existing work acknowledged and built upon. Technology choices match exactly what's installed/used. |
+
+**Red flags:** Recommending technologies not in the project's stack. Ignoring existing implementations. Treating a working system as greenfield. Over-engineering beyond the project's actual scale. Not detecting that target content already exists.
+
+**Special case:** If no codebase context is available (no CLAUDE.md, no git repo), default score is 6 (neutral). The dimension becomes meaningful when a project context exists.
+
+---
+
 ## Weighted Score Calculation
 
 ```
-weighted_score = (intent * 0.20) + (precision * 0.18) + (completeness * 0.18)
-               + (structure * 0.14) + (opus_opt * 0.10) + (scientific * 0.10)
-               + (user_fit * 0.10)
+weighted_score = (intent * 0.18) + (precision * 0.16) + (completeness * 0.16)
+               + (structure * 0.12) + (opus_opt * 0.08) + (scientific * 0.08)
+               + (user_fit * 0.10) + (codebase_grounding * 0.12)
 ```
 
-**Weight changes from v1.0:** Intent reduced 0.25→0.20, Precision 0.20→0.18, Completeness 0.20→0.18, Structure 0.15→0.14. This creates room for User-Fit (0.10) while keeping the total at 1.00.
+**Weight changes from v2.0:** Intent 0.20→0.18, Precision 0.18→0.16, Completeness 0.18→0.16, Structure 0.14→0.12, Opus 0.10→0.08, Scientific 0.10→0.08. This creates room for Codebase Grounding (0.12) — the most impactful new dimension based on empirical evaluation data (contributed +2.5 points in Round 3 testing). Total = 1.00.
+
+**Pass threshold: 9.2/10** (raised from 8.5 in v2.0, based on evaluation showing 8.5 was too easily met).
 
 ## Critic Output Format
 
@@ -169,6 +189,10 @@ The Critic agent MUST output its evaluation in this exact structure:
       Evidence: [ROSETTA patterns applied or not]
       Issue: [if score < 8, what ROSETTA insights were missed]
     </dimension>
+    <dimension name="codebase-grounding" score="8" weight="0.12">
+      Evidence: [real files referenced, invariants preserved, scale match, existing content detected]
+      Issue: [if score < 8, what codebase context was missed or misrepresented]
+    </dimension>
   </scores>
 
   <needs-clarification>
@@ -189,12 +213,15 @@ The Critic agent MUST output its evaluation in this exact structure:
 </critique>
 ```
 
-## Anti-Inflation Rules
+## Anti-Inflation Rules (v3.0 — STRICT)
 
-To prevent score inflation:
+To prevent score inflation (empirical finding: v2.0 self-assessment inflated by 2.51 points):
 
-1. **Anchor to examples:** Always compare against the rubric anchors, not gut feeling
-2. **Default to 7:** Start at 7 and adjust up/down based on evidence
+1. **Start at 5, justify UPWARD:** Do NOT start at 7. 5 is mediocre. Justify every point above 5.
+2. **Anchor to examples:** Always compare against the rubric anchors, not gut feeling
 3. **Require evidence:** Every score must cite specific content from the prompt
 4. **Penalize missing sections:** Absent required sections = automatic 4 or below for structure
 5. **Check Decision Matrix:** If techniques don't match the task type from the Quick Decision Matrix in scientific-principles.md, score scientific-grounding accordingly
+6. **Cross-check codebase:** If the prompt recommends X but the project uses Y, score codebase-grounding accordingly. Over-engineering beyond actual project scale = automatic 5 or below.
+7. **"Adequate" = 6, "Good" = 7:** Reserve 8+ for genuinely strong work. 9 = near-perfect. 10 = cannot find a single improvement.
+8. **Pass threshold is 9.2:** This is deliberately hard to reach. Most prompts should require 1-2 revision rounds.
