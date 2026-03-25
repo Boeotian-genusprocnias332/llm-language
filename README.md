@@ -516,5 +516,5 @@ Contributions welcome. Priority areas:
 Built on foundational research by Wei et al. (CoT), Yao et al. (ToT), Madaan et al. (Self-Refine), Du et al. (MAD), Hannah et al. (PersonalLLM), Agarwal et al. (PromptWizard), and Anthropic's Claude prompting guidelines. Context engineering methodology from arXiv:2602.20478 (Codified Context). Full bibliography in [`docs/BIBLIOGRAPHY.md`](docs/BIBLIOGRAPHY.md).
 
 <p align="center">
-  <sub>Made with ultrathink by Andrea Nardello — UCL COMP0051</sub>
+  <sub>Made with ultrathink by Andrea Nardello</sub>
 </p>
