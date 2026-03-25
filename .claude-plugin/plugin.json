@@ -1,5 +1,5 @@
 {
   "name": "llm-language",
-  "version": "3.1.0",
-  "description": "Self-evolving prompt meta-compiler with mandatory codebase awareness, CLAUDE.md auto-maintenance, ROSETTA.md persistent memory, and 100+ scientific papers. v3.1: Phase 0.6 CLAUDE.md generation/update (Codified Context methodology), /llm-language:update sub-skill for self-evolution research, 8 scoring dimensions, threshold 9.2, critic anchor at 5."
+  "version": "3.2.0",
+  "description": "Self-evolving prompt meta-compiler with Jarvis proactive mode, mandatory codebase awareness, CLAUDE.md auto-maintenance, and ROSETTA.md persistent memory. v3.2: /llm-language:jarvis (3-phase proactive assistant — observe, anticipate, act), /llm-language:update (self-evolution research), Phase 0.6 CLAUDE.md maintenance, 8 scoring dimensions, threshold 9.2."
 }

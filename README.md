@@ -1,8 +1,8 @@
 # llm-language
 
-**A scientifically-grounded prompt meta-compiler for Claude Code (v3.0 -- mandatory codebase awareness)**
+**A scientifically-grounded prompt meta-compiler for Claude Code (v3.2 -- Jarvis proactive mode + mandatory codebase awareness)**
 
-> Automatic prompt re-engineering through multi-agent debate, grounded in 100+ prompt engineering papers, specialized for Claude Opus 4.6 with ultrathink. v3.0 adds mandatory codebase scanning before every generation.
+> Automatic prompt re-engineering through multi-agent debate, proactive workflow anticipation via Jarvis mode, and mandatory codebase awareness — grounded in 100+ prompt engineering papers, specialized for Claude Opus 4.6 with ultrathink.
 
 ---
 
@@ -16,6 +16,9 @@ The pipeline implements a **Diverse Multi-Agent Debate** (DMAD) architecture whe
 
 ### Key Features
 
+- **Jarvis proactive mode** (`/llm-language:jarvis`): 3-phase assistant that observes user workflows (sessions 1-10), anticipates next steps (11-30), and acts autonomously (30+, opt-in). Patterns are LEARNED from behavior, never hardcoded.
+- **Skill auto-invocation**: Jarvis invokes /brainstorming before creative tasks, /code-review after implementation, /paper after LaTeX edits — adapting to each user's actual workflow
+- **Workflow pattern learning**: ROSETTA.md § Jarvis Patterns tracks post-task sequences, building a personalized workflow model with confidence scoring
 - **Mandatory codebase awareness**: reads CLAUDE.md + key files before generating (Phase 0.5)
 - **Context mismatch detection**: flags when request doesn't match project
 - **File content awareness**: reads target files to detect existing work
@@ -66,6 +69,30 @@ User Message
 [Phase 6: ROSETTA UPDATE]  Update ROSETTA.md with learnings from this
                             interaction — effective patterns, user signals
 ```
+
+### Jarvis Mode (Proactive Layer)
+
+When activated via `/llm-language:jarvis`, a proactive layer wraps around the standard pipeline:
+
+```
+[Standard Pipeline] → Task Complete
+    |
+    v
+[Observe] Record what user does next (ROSETTA § Jarvis Patterns)
+    |
+    v
+[Anticipate] If pattern confidence ≥ 60%: propose next step
+    |
+    v
+[Act] If confidence ≥ 90% AND autonomous mode: execute without asking
+```
+
+**Three phases:**
+- **Observation** (sessions 1-10): watches and records, never proposes
+- **Anticipation** (sessions 11-30): proposes next steps, learns from responses
+- **Autonomous** (sessions 30+, opt-in): executes high-confidence patterns automatically
+
+Safety rails: never auto-commits, never auto-deletes, never auto-pushes. User can say `jarvis stop` at any time.
 
 ### ROSETTA.md — Persistent Memory
 
@@ -208,7 +235,9 @@ llm-language/
 │   └── marketplace.json         # Registration metadata
 ├── skills/
 │   └── llm-language/
-│       ├── SKILL.md             # Main skill (pipeline orchestrator, v3.0)
+│       ├── SKILL.md             # Main skill (pipeline orchestrator, v3.2)
+│       ├── jarvis/
+│       │   └── SKILL.md             # Proactive assistant (v3.2, 3-phase)
 │       └── references/
 │           ├── scientific-principles.md   # 20+ techniques, 110+ papers
 │           ├── xml-prompt-template.md     # XML template with field docs

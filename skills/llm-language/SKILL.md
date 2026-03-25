@@ -465,6 +465,16 @@ Even when llm-language is NOT explicitly invoked, the system should update ROSET
 
 Update the relevant ROSETTA.md sections silently. This is lightweight — just a few lines appended to existing tables.
 
+**Phase 6b also feeds Jarvis passive observation:**
+
+8. **Workflow sequence logging** (Jarvis): at the end of each task, record in ROSETTA § Jarvis Patterns:
+   - What task was completed (inferred from the conversation and tool calls)
+   - What the user asked for next (the follow-up message)
+   - Which skills/agents were invoked during the task
+   - Whether the user seemed satisfied (corrections = no, moved on = yes)
+
+   This data accumulates even when `/llm-language:jarvis` is NOT invoked. Jarvis learns passively from every session, building its workflow model in the background. When the user eventually invokes Jarvis, the pattern library is already populated.
+
 ---
 
 ## ROSETTA.md System
