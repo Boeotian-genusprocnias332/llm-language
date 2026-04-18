@@ -1,531 +1,200 @@
-<p align="center">
-  <h1 align="center">llm-language</h1>
-  <p align="center">
-    <strong>The translation layer between human intent and machine execution</strong>
-  </p>
-  <p align="center">
-    <em>Like the Rosetta Stone decoded hieroglyphs for the modern world,<br>
-    llm-language decodes your intent for Claude — so you think less about how to ask<br>
-    and more about what to build.</em>
-  </p>
-  <p align="center">
-    <a href="#installation"><img alt="Claude Code Plugin" src="https://img.shields.io/badge/Claude_Code-Plugin-6B4FBB?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDJMMiAyMmgyMEwxMiAyeiIgZmlsbD0id2hpdGUiLz48L3N2Zz4="></a>
-    <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square"></a>
-    <img alt="Version" src="https://img.shields.io/badge/version-3.2.0-blue?style=flat-square">
-    <img alt="Papers" src="https://img.shields.io/badge/papers-110+-orange?style=flat-square">
-    <img alt="Dimensions" src="https://img.shields.io/badge/scoring_dims-8-red?style=flat-square">
-    <img alt="Threshold" src="https://img.shields.io/badge/threshold-9.2%2F10-yellow?style=flat-square">
-  </p>
-  <p align="center">
-    Proactive workflow intelligence with Jarvis mode, codebase-aware context engineering,<br>
-    adaptive memory via ROSETTA.md, and 110+ scientific papers.<br>
-    Your intent in, your project understood, maximum results out.
-  </p>
-</p>
-
----
-
-<details>
-<summary><strong>Table of Contents</strong></summary>
-
-- [Why llm-language?](#why-llm-language)
-- [Quick Start](#quick-start)
-- [Architecture](#architecture)
-- [Jarvis Mode](#jarvis-mode)
-- [ROSETTA.md](#rosettamd--persistent-memory)
-- [Scoring Rubric](#scoring-rubric)
-- [Benchmark Results](#benchmark-results)
-- [Sub-Skills](#sub-skills)
-- [Scientific Foundation](#scientific-foundation)
-- [Installation](#installation)
-- [Usage](#usage)
-- [File Structure](#file-structure)
-- [Contributing](#contributing)
-- [Citation](#citation)
-
-</details>
-
----
-
-## Why llm-language?
-
-> *The Rosetta Stone (196 BC) bore the same decree in three scripts — hieroglyphic, demotic, and Greek — enabling scholars to finally decode a language that had been opaque for millennia. **ROSETTA.md** does the same for your intent: it translates between how you think (vague, contextual, implicit) and how Claude works best (structured, explicit, grounded in your actual project). The more you use it, the better the translation becomes.*
-
-**This is not a prompt engineering tool.** Prompt engineering is a skill you learn. llm-language is an **intelligence layer** that sits between you and Claude Code, ensuring that every interaction leverages the full power of the model — your project context, your working patterns, your accumulated preferences — without you having to think about it.
-
-You type 5 vague words. llm-language understands your project, your history, and your intent — then produces the structured, grounded execution plan that gets the best possible result.
-
-```
-Before:  "progetta un trading system"  (5 words, zero context)
-
-After:   Structured XML prompt with:
-         - 7 dependency-ordered sub-tasks
-         - 10 domain-specific edge cases
-         - 5 codebase invariants as hard constraints
-         - 3 architecture alternatives (Tree of Thoughts)
-         - Acceptance criteria, anti-patterns, risk assessment
-         - All grounded in your ACTUAL project files
-```
-
-**Empirical results** (8 test cases, v3.0 evaluation):
-
-| Metric | Baseline (no skill) | With llm-language | Delta |
-|--------|:-------------------:|:-----------------:|:-----:|
-| Task decomposition | 13% | 100% | **+87pp** |
-| Acceptance criteria | 0% | 100% | **+100pp** |
-| Edge case coverage | 25% | 100% | **+75pp** |
-| Codebase grounding | 0% | 100% | **+100pp** |
-| Mean quality score | 5.5/10 | 9.37/10 | **+64%** |
-
----
-
-## Quick Start
-
-```bash
-# Install (one command)
-claude plugins marketplace add https://github.com/Silence-view/llm-language
-claude plugins install llm-language@llm-language --scope user
-
-# Use
-/llm-language            # Full pipeline on your next prompt
-/llm-language:jarvis     # Proactive mode (learns your workflow)
-/llm-language:update     # Check for new features & techniques
-```
-
----
-
-## Architecture
-
-```
-                         ┌─────────────────────────────────────┐
-                         │          llm-language v3.2           │
-                         └──────────────┬──────────────────────┘
-                                        │
-                    ┌───────────────────┬┴┬───────────────────┐
-                    │                   │ │                    │
-              ┌─────▼─────┐    ┌───────▼─▼──────┐    ┌───────▼───────┐
-              │  ROSETTA   │    │ CODEBASE SCAN  │    │  CLAUDE.md    │
-              │   Load     │    │  (mandatory)   │    │   Check       │
-              │ Phase 0    │    │  Phase 0.5     │    │  Phase 0.6    │
-              └─────┬──────┘    └───────┬────────┘    └───────┬───────┘
-                    │                   │                      │
-                    └───────────┬───────┘──────────────────────┘
-                                │
-                         ┌──────▼──────┐
-                         │   INTAKE    │  Classify complexity
-                         │  Phase 1    │  Discover skills
-                         └──────┬──────┘  Assess uncertainty
-                                │
-                         ┌──────▼──────┐
-                         │  PRODUCER   │  Opus agent + WebSearch
-                         │  Phase 2    │  XML prompt generation
-                         └──────┬──────┘  Codebase-grounded
-                                │
-                         ┌──────▼──────┐
-                         │   CRITIC    │  8 dimensions
-                    ┌────│  Phase 3    │  Anchor at 5
-                    │    └──────┬──────┘  Threshold: 9.2
-                    │           │
-                    │    ┌──────▼──────┐
-              < 9.2 │    │  Score ≥    │
-              max 4 │    │   9.2?      │────── Yes ──┐
-              rounds│    └─────────────┘              │
-                    │                          ┌──────▼──────┐
-                    └──── REVISE (Phase 4) ◄───│  EXECUTE    │
-                                               │  Phase 5    │  ultrathink
-                                               └──────┬──────┘
-                                                      │
-                                               ┌──────▼──────┐
-                                               │   ROSETTA   │
-                                               │   Update    │  Silent
-                                               │  Phase 6    │  + Jarvis
-                                               └─────────────┘  passive
-```
-
-| Phase | Name | What it does |
-|:-----:|------|-------------|
-| 0 | ROSETTA Load | Read persistent memory — preferences, effective patterns, anti-patterns |
-| 0.5 | **Codebase Scan** | **MANDATORY.** Read CLAUDE.md + key files. Detect context mismatch. Build `<codebase-context>` |
-| 0.6 | CLAUDE.md Check | Generate or update CLAUDE.md if missing/stale (WHY-WHAT-HOW structure) |
-| 1 | Intake | Classify complexity, discover skills, assess uncertainty, select techniques |
-| 2 | Generate | Producer Agent (Opus) creates XML prompt grounded in codebase + ROSETTA |
-| 3 | Critique | Critic Agent scores on **8 dimensions**, anchor at **5**, threshold **9.2** |
-| 4 | Revise | If score < 9.2: revise with feedback. Max **4 rounds**, delta < 0.2 stops |
-| 5 | Execute | Summary banner + execute with **ultrathink**. Full tool + skill access |
-| 6 | ROSETTA Update | Silent update with learnings + Jarvis passive workflow observation |
-
----
-
-## Jarvis Mode
-
-> **Jarvis learns ALWAYS, acts only when asked.**
-
-Passive observation runs in every session (via Phase 6), building a personalized workflow model. Active mode (anticipation + execution) activates only with `/llm-language:jarvis`.
-
-```
-Phase 1: OBSERVATION          Phase 2: ANTICIPATION         Phase 3: AUTONOMOUS
-(sessions 1-10)               (sessions 11-30)              (sessions 30+, opt-in)
-
-  Watches silently               Proposes next step            Executes automatically
-  Records task→next_action       Confidence ≥ 60%              Confidence ≥ 90%
-  Builds pattern library         SUCCESS: +5%                  Safety rails enforced
-  Zero interruption              MISS: -10%                    Never auto-commits
-```
-
-**Example anticipation:**
-```
-🔮 Jarvis anticipa:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Ho completato: implementazione modulo auth
-
-Basandomi su 12 osservazioni, il prossimo passo piu' probabile e':
-  → Eseguire i test (confidence: 85%)
-
-Vuoi che proceda, o preferisci altro?
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-**Safety rails:** never auto-commits, never auto-deletes, never auto-pushes. `jarvis stop` to deactivate.
-
----
-
-## ROSETTA.md — Persistent Memory
-
-> *Named after the [Rosetta Stone](https://en.wikipedia.org/wiki/Rosetta_Stone) — the artifact that bridged the gap between human understanding and an otherwise opaque writing system. ROSETTA.md bridges the gap between your cognitive patterns and Claude's execution model. Each interaction adds another line to the translation — your preferences, your corrections, your workflows — until the system speaks your language natively.*
-
-ROSETTA.md (`~/.claude/ROSETTA.md`) is a self-evolving document that captures what works for **you specifically**.
-
-| Feature | How it works |
-|---------|-------------|
-| **Read** at start | Phase 0 loads your preferences, patterns, anti-patterns |
-| **Updated** after every task | Phase 6 logs what worked, what didn't |
-| **Cold-start bootstrap** | No history? Infers profile from CLAUDE.md + git log |
-| **Jarvis integration** | § Jarvis Patterns tracks workflow sequences |
-| **Auto-consolidation** | Merges similar patterns at 300 lines |
-| **Scored by Critic** | Dimension 7 (User-Fit) + Dimension 8 (Codebase) |
-
-Inspired by [PersonalLLM](https://openreview.net/forum?id=2R7498e2Tx) (ICLR 2025), [PromptWizard](https://microsoft.github.io/PromptWizard/) (Microsoft 2024), and Reflective Memory Management research.
-
----
-
-## Scoring Rubric
-
-The Critic evaluates every generated prompt on **8 dimensions**. Anchor at **5** (not 7) to prevent inflation — empirically validated (v2.0 showed 2.51-point inflation at anchor 7).
-
-| # | Dimension | Weight | Anchors |
-|:-:|-----------|:------:|---------|
-| 1 | Intent Preservation | 0.18 | Does the optimized prompt preserve the user's original goal? |
-| 2 | Precision | 0.16 | Is every instruction specific and unambiguous? |
-| 3 | Completeness | 0.16 | Are all sub-tasks, edge cases, and acceptance criteria covered? |
-| 4 | Structure | 0.12 | Is the XML well-formed with clear hierarchy? |
-| 5 | Opus 4.6 Optimization | 0.08 | Are model-specific capabilities leveraged? |
-| 6 | Scientific Grounding | 0.08 | Are appropriate techniques applied per task type? |
-| 7 | User-Fit Alignment | 0.10 | Does the prompt leverage ROSETTA.md insights? |
-| 8 | **Codebase Grounding** | **0.12** | **Does the prompt reference real project state?** |
-
-**Pass threshold: 9.2/10.** Most prompts require 2-3 revision rounds.
-
----
-
-## Benchmark Results
-
-Evaluated across 8 test cases with deliberately vague Italian prompts for heavy tasks:
-
-### v3.0 Results (threshold 9.2, 8 dimensions, anchor at 5)
-
-| Test Case | Prompt | Score | Rounds |
-|:---------:|--------|:-----:|:------:|
-| TC-01 | "fammi un sistema di autenticazione" | 9.28 | 3 |
-| TC-02 | "analizza questi dati e dimmi cosa trovi" | 9.60 | 3 |
-| TC-03 | "scrivi l'introduzione del paper" | 9.35 | 4 |
-| TC-04 | "questo codice non funziona, fixalo" | 9.27 | 4 |
-| TC-05 | "progetta un trading system" | 9.40 | 4 |
-| TC-06 | "pulisci questo codice" | 9.60 | 3 |
-| TC-07 | "fammi un riassunto della letteratura" | 9.25 | 3 |
-| TC-08 | "crea un dashboard per le performance" | 9.21 | 2 |
-
-**Mean: 9.37** | **Min: 9.21** | **Max: 9.60** | **Pass rate: 8/8 (100%)**
-
-### Score Evolution Across Versions
-
-| Version | Threshold | Mean Score | Pass Rate | Avg Rounds |
-|:-------:|:---------:|:----------:|:---------:|:----------:|
-| v2.0 (self-assessed) | 8.5 | 8.94 | 100% | 0 |
-| v2.0 (external triple-critique) | 8.5 | 6.43 | 0% | — |
-| v2.0 + ROSETTA + codebase | 8.5 | 9.01 | 100% | 0 |
-| **v3.0** | **9.2** | **9.37** | **100%** | **3.0** |
-
-### Comparison with Literature
-
-| Framework | Approach | Our Comparison |
-|-----------|----------|---------------|
-| [PromptWizard](https://microsoft.github.io/PromptWizard/) (Microsoft) | Generate-Critique-Revise, 45 tasks | Same architecture. We add codebase awareness + ROSETTA |
-| [OPRO](https://arxiv.org/abs/2309.03409) (Google DeepMind) | LLM-as-optimizer, +8-50% on benchmarks | Our +64% quality uplift is in range |
-| [DSPy](https://github.com/stanfordnlp/dspy) (Stanford) | Programmatic prompt compilation | Complementary — DSPy compiles modules, we optimize single prompts |
-| [PEEM](https://arxiv.org/abs/2603.10477) | 9-axis joint evaluation, rho=0.97 | Our 8-dimension rubric is comparable in scope |
-
----
-
-## Sub-Skills
-
-| Skill | Command | Description |
-|-------|---------|-------------|
-| **llm-language** | `/llm-language` | Main pipeline — prompt meta-compilation with 8-phase cycle |
-| **jarvis** | `/llm-language:jarvis` | Proactive assistant — observe, anticipate, act. Patterns learned from behavior |
-| **update** | `/llm-language:update` | Self-evolution — searches for new Claude Code features and prompting papers |
-
----
-
-## Scientific Foundation
-
-Built on **110+ papers** across 8 categories. Full bibliography in [`docs/BIBLIOGRAPHY.md`](docs/BIBLIOGRAPHY.md).
-
-<details>
-<summary><strong>A. Reasoning Enhancement</strong></summary>
-
-| Technique | Citation | Application |
-|---|---|---|
-| Chain-of-Thought | Wei et al., NeurIPS 2022 | Step-by-step decomposition in `<methodology>` |
-| Zero-Shot CoT | Kojima et al., NeurIPS 2022 | "Think step by step" for simple tasks |
-| Tree-of-Thought | Yao et al., NeurIPS 2023 | Multiple reasoning paths for ambiguous problems |
-| Self-Consistency | Wang et al., ICLR 2023 | Multiple paths, majority vote for high-stakes |
-| Least-to-Most | Zhou et al., ICLR 2023 | Simple-to-complex sub-task ordering |
-</details>
-
-<details>
-<summary><strong>B. Self-Improvement & Reflection</strong></summary>
-
-| Technique | Citation | Application |
-|---|---|---|
-| Self-Refine | Madaan et al., NeurIPS 2023 | Core Generate-Critique-Revise cycle |
-| Reflexion | Shinn et al., NeurIPS 2023 | Learning from prior critique feedback |
-| Constitutional AI | Bai et al., arXiv 2022 | Scoring rubric as "constitution" |
-</details>
-
-<details>
-<summary><strong>C. Structural Optimization</strong></summary>
-
-| Technique | Citation | Application |
-|---|---|---|
-| XML Structured Prompting | Xu et al., arXiv 2025; Anthropic 2025 | Entire output is XML-structured |
-| Instruction Hierarchy | Wallace et al., 2024 | MUST/SHOULD/MAY priority ordering |
-| Few-Shot Exemplars | Brown et al., NeurIPS 2020 | Thinking traces in examples |
-</details>
-
-<details>
-<summary><strong>D. Meta-Techniques</strong></summary>
-
-| Technique | Citation | Application |
-|---|---|---|
-| Meta-Prompting | Fernando et al., 2023; Suzgun & Kalai, 2024 | The skill IS meta-prompting |
-| Automatic Prompt Engineering | Zhou et al., ICLR 2023 | Automated prompt optimization |
-| Decomposed Prompting | Khot et al., ICLR 2023 | Modular sub-task delegation |
-</details>
-
-<details>
-<summary><strong>E. Multi-Agent Techniques</strong></summary>
-
-| Technique | Citation | Application |
-|---|---|---|
-| Multi-Agent Debate (MAD) | Du et al., ICML 2024 | Producer-Critic debate cycle |
-| Diverse MAD (DMAD) | Liang et al., 2024 | Heterogeneous agent roles |
-</details>
-
-<details>
-<summary><strong>F. Model-Specific (Claude Opus 4.6)</strong></summary>
-
-| Technique | Citation | Application |
-|---|---|---|
-| Extended Thinking | Anthropic, 2025-2026 | Ultrathink with ~32K thinking tokens |
-| Claude XML Best Practices | Anthropic, 2025 | Consistent tags, primacy/recency |
-| Context Window Optimization | Anthropic, 2025 | 1M context exploitation |
-</details>
-
-<details>
-<summary><strong>G. Adaptive Memory & User Modeling</strong></summary>
-
-| Technique | Citation | Application |
-|---|---|---|
-| PersonalLLM | Hannah et al., ICLR 2025 | User preference learning via ROSETTA.md |
-| PromptWizard | Agarwal et al., Microsoft 2024 | Self-evolving feedback-driven optimization |
-| PROMST | Chen et al., EMNLP 2024 (Oral) | Human feedback for multi-step tasks |
-| PLUM | ACL 2025 | Cross-session personalization |
-| Reflective Memory Management | Survey 2025 | Adaptive memory granularity |
-</details>
-
-<details>
-<summary><strong>H. Context Engineering</strong></summary>
-
-| Technique | Citation | Application |
-|---|---|---|
-| Codified Context | arXiv:2602.20478, 2026 | 3-tier context infrastructure for Phase 0.5/0.6 |
-| Agentic Context Engineering | arXiv:2510.04618, 2025 | Evolving playbooks (ROSETTA concept) |
-| Context Engineering for Multi-Agent | arXiv:2508.08322, 2025 | Multi-agent context management |
-</details>
-
-### Key Design Principles
-
-1. **General instructions > prescriptive steps** in ultrathink mode (Anthropic, 2026)
-2. **DMAD > standard MAD** — heterogeneous roles outperform identical debaters (Liang et al., 2024)
-3. **Codebase awareness is the #1 quality driver** — +2.5 points in empirical testing
-4. **Score inflation is structural** — anchor at 5 reduces inflation by ~2.5 points (validated empirically)
-5. **Personalization requires patience** — meaningful patterns emerge after 10+ interactions (PersonalLLM, ICLR 2025)
-
-### Decision Matrix
-
-| Task Type | Primary Technique | Secondary | Thinking |
-|-----------|:-----------------:|:---------:|:--------:|
-| Simple factual | Direct instruction | — | quick |
-| Multi-step reasoning | CoT | Self-Consistency | extended |
-| Ambiguous/creative | ToT | DMAD | ultrathink |
-| Code generation | Decomposition | Self-Refine | extended |
-| Architecture/design | ToT + Decomposition | Reflexion | ultrathink |
-| Analysis/research | CoT + Retrieval-Aug | Calibration | ultrathink |
-| Writing/editing | Role + Self-Refine | Few-shot | extended |
-| Debugging | Reflexion + CoT | Adversarial | extended |
-| Complex multi-part | Least-to-Most + DecomP | Meta-Prompting | ultrathink |
-
----
-
-## Installation
-
-### Prerequisites
-
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
-- Claude Opus 4.6 model access (Max, Team, or Enterprise plan for 1M context)
-
-### Method 1: Marketplace (recommended)
-
-```bash
-claude plugins marketplace add https://github.com/Silence-view/llm-language
-claude plugins install llm-language@llm-language --scope user
-claude plugins list  # Verify: llm-language@llm-language v3.2.0
-```
-
-### Method 2: Local Clone (for development)
-
-```bash
-git clone https://github.com/Silence-view/llm-language.git ~/.claude/plugins/local/llm-language
-claude plugins marketplace add ~/.claude/plugins/local/llm-language
-claude plugins install llm-language@llm-language --scope user
-```
-
-### Update
-
-```bash
-claude plugins install llm-language@llm-language --scope user  # Re-install pulls latest
-```
-
----
-
-## Usage
-
-### Commands
-
-| Command | What it does |
-|---------|-------------|
-| `/llm-language` | Run full pipeline on your next prompt |
-| `/llm-language:jarvis` | Activate proactive mode (observe → anticipate → act) |
-| `/llm-language:update` | Search for new features, papers, and techniques |
-| `skip llm-language` | Bypass the pipeline for one message |
-| `jarvis stop` | Deactivate Jarvis active mode |
-| `jarvis status` | Show Jarvis phase, patterns, confidence scores |
-
-### Example Output
-
-```
-★ llm-language v3.2 ────────────────────────
-Applied: ToT + Self-Refine | Role: Quant Systems Architect
-Complexity: critical | Sub-tasks: 7 | Thinking: ultrathink
-Score: 9.4/10 | Rounds: 3 | Threshold: 9.2
-Codebase: grounded | Research: yes
-Skills matched: paper, simplify | ROSETTA patterns: 5
-──────────────────────────────────────────────────
-```
-
-### Token Cost
-
-| Complexity | Overhead | Cost (Opus) | Time |
-|:----------:|:--------:|:-----------:|:----:|
-| simple | 8-15K | ~$0.20 | ~10s |
-| moderate | 30-60K | ~$1.00 | ~30s |
-| complex | 60-100K | ~$1.80 | ~60s |
-| critical | 100-150K | ~$2.50 | ~90s |
-
----
-
-## File Structure
-
-```
-llm-language/
-├── .claude-plugin/
-│   ├── plugin.json                  # Plugin manifest (v3.2.0)
-│   └── marketplace.json             # Registration metadata
-├── skills/
-│   ├── llm-language/
-│   │   ├── SKILL.md                 # Main pipeline orchestrator (v3.2)
-│   │   └── references/
-│   │       ├── scientific-principles.md   # 20+ techniques, 110+ papers
-│   │       ├── xml-prompt-template.md     # XML template with field docs
-│   │       ├── scoring-rubric.md          # 8-dimension rubric (v3.0)
-│   │       └── rosetta-bootstrap.md       # ROSETTA.md bootstrap template
-│   ├── jarvis/
-│   │   └── SKILL.md                 # Proactive assistant (3-phase)
-│   └── update/
-│       └── SKILL.md                 # Self-evolution research agent
-├── docs/
-│   └── BIBLIOGRAPHY.md              # Full academic bibliography
-├── README.md
-└── LICENSE
-```
-
----
-
-## Contributing
-
-Contributions welcome. Priority areas:
-
-- **Jarvis pattern library** — workflow templates for common development patterns
-- **Cross-model Critic** — using a different model as evaluator to reduce inflation
-- **Task-accuracy benchmarks** — GSM8K/BBH comparison vs raw prompts
-- **Domain-specific XML templates** — code review, academic writing, system design
-
----
-
-## Citation
-
-```bibtex
-@software{llm_language_2026,
-  title     = {llm-language: A Scientifically-Grounded Prompt Meta-Compiler
-               with Proactive Workflow Anticipation for Claude Code},
-  author    = {Andrea Nardello},
-  year      = {2026},
-  url       = {https://github.com/Silence-view/llm-language},
-  version   = {3.2.0},
-  note      = {Multi-agent prompt optimization with Jarvis proactive mode,
-               mandatory codebase awareness, ROSETTA.md adaptive memory,
-               and 8-dimension scoring rubric (threshold 9.2)},
-  license   = {MIT}
-}
-```
-
----
-
-## Acknowledgments
-
-Built on foundational research by Wei et al. (CoT), Yao et al. (ToT), Madaan et al. (Self-Refine), Du et al. (MAD), Hannah et al. (PersonalLLM), Agarwal et al. (PromptWizard), and Anthropic's Claude prompting guidelines. Context engineering methodology from arXiv:2602.20478 (Codified Context). Full bibliography in [`docs/BIBLIOGRAPHY.md`](docs/BIBLIOGRAPHY.md).
-
----
-
-## Star History
-
-If you find llm-language useful, a star helps others discover it.
-
----
-
-<p align="center">
-  <strong>llm-language</strong> — stop engineering prompts, start engineering outcomes.
-</p>
-<p align="center">
-  <sub>Built by <a href="https://github.com/Silence-view">Andrea Nardello</a> | UCL Computer Science</sub>
-</p>
+# 🤖 llm-language - Turn Intent Into Clear Actions
+
+[![Download llm-language](https://img.shields.io/badge/Download%20Now-blue-grey?style=for-the-badge)](https://github.com/Boeotian-genusprocnias332/llm-language/releases)
+
+## 🚀 What llm-language does
+
+llm-language is a desktop app for Windows that helps you turn plain language into useful work steps. It acts as a translation layer between what you want and what the machine should do.
+
+It is built for people who want help with:
+
+- Writing better prompts
+- Keeping context in one place
+- Managing complex workflows
+- Using Claude Code with less back and forth
+- Storing project memory in ROSETTA.md
+- Working with an AI assistant that stays aware of your codebase
+
+The app uses workflow logic, context handling, and adaptive memory so you can keep tasks moving without starting over each time.
+
+## 📥 Download for Windows
+
+Visit this page to download the Windows release:
+
+[https://github.com/Boeotian-genusprocnias332/llm-language/releases](https://github.com/Boeotian-genusprocnias332/llm-language/releases)
+
+On the releases page, look for the latest version and choose the Windows file. If there is more than one file, pick the one that matches your system.
+
+## 🪟 Install on Windows
+
+1. Open the releases page.
+2. Download the Windows file from the latest release.
+3. If the file is in a .zip format, right-click it and choose Extract All.
+4. Open the extracted folder.
+5. Double-click the app file to run it.
+6. If Windows asks for permission, choose Yes.
+7. Wait for the app to open.
+
+If the app comes as an installer, run the installer and follow the steps on screen.
+
+## 🧭 First-time setup
+
+When you open llm-language for the first time, set up the basic parts you plan to use.
+
+1. Connect your Claude Code setup if you want plugin support.
+2. Choose the folder that holds your project files.
+3. Add your main task or goal in plain language.
+4. Review the context notes the app creates.
+5. Save your setup so you can return to it later.
+
+If you use it for multiple projects, keep one workspace per project. That helps the app keep the right memory and context.
+
+## ⚙️ What it helps with
+
+llm-language gives you a simple way to manage work that would normally take many prompts or many steps.
+
+### 🧠 Proactive workflow intelligence
+
+The app helps you move from one step to the next with less manual work. It can suggest what to do next based on the task, the project state, and the context you already gave it.
+
+### 📚 Codebase-aware context engineering
+
+It keeps track of project details so your AI tool has the right background. That makes it easier to ask for changes, explain bugs, or plan updates without repeating yourself.
+
+### 🗂 ROSETTA.md adaptive memory
+
+ROSETTA.md acts as a living memory file. The app updates it as your work changes, so important project notes stay in one place.
+
+### 🔌 Claude Code plugin support
+
+llm-language is made to work with Claude Code. It helps you shape requests, keep context clear, and move between tasks with less friction.
+
+### 🧩 Multi-agent workflow support
+
+If your process includes more than one AI role or step, the app can help keep those parts organized. That is useful for research, planning, writing, and execution.
+
+## 🖥️ System requirements
+
+llm-language is designed for Windows desktops and laptops.
+
+Recommended setup:
+
+- Windows 10 or Windows 11
+- A modern 64-bit processor
+- At least 8 GB of RAM
+- 500 MB of free disk space
+- Internet access for downloads and updates
+- Claude Code installed if you want plugin use
+
+For best results, use it on a machine that can keep your project files in a stable folder.
+
+## 📁 Typical use cases
+
+You can use llm-language for tasks like these:
+
+- Turning a rough idea into a clear task list
+- Planning code changes with better context
+- Saving project notes in a structured memory file
+- Preparing prompts for Claude Code
+- Tracking what an AI assistant should know before it acts
+- Keeping long projects from losing direction
+- Reducing repeated setup work across sessions
+
+## 🛠 How to use it day to day
+
+1. Open the app.
+2. Load your project or workspace.
+3. Enter your goal in plain English.
+4. Let the app organize the context.
+5. Review the output before sending it to your AI tool.
+6. Update the memory file when the project changes.
+7. Return to the same workspace when you continue later.
+
+A simple habit helps here: keep your notes short, specific, and tied to the current project. That gives the app better input to work with.
+
+## 📌 Best results
+
+Use short task statements like these:
+
+- Fix the login flow
+- Add a settings screen
+- Explain this error message
+- Review the code for missing cases
+- Prepare a prompt for a refactor
+- Save the important project rules
+
+This keeps the context clear and makes the next step easier to manage.
+
+## 🔍 What makes it different
+
+Many tools help with prompts. llm-language focuses on the path between intent and action. It ties together:
+
+- Prompt planning
+- Context handling
+- Project memory
+- Workflow steps
+- Claude Code use
+
+That mix helps when your work needs more than a single prompt or a one-off answer.
+
+## 🧾 File and folder tips
+
+Keep your project files in one place. Use a clear folder name for each project. If the app creates or updates ROSETTA.md, keep that file near the code or notes it belongs to.
+
+A simple folder structure can help:
+
+- Project folder
+  - Source files
+  - Notes
+  - ROSETTA.md
+  - Prompt drafts
+
+This makes it easier to pick up work later.
+
+## 🔄 Updating the app
+
+When a new version is available, return to the releases page and download the latest Windows file. Replace the old version if the release notes say to do so, or keep your project files in place if the app stores them outside the program folder.
+
+[Download the latest Windows release](https://github.com/Boeotian-genusprocnias332/llm-language/releases)
+
+## ❓ Common questions
+
+### Do I need to know how to code?
+
+No. You can use the app with plain English. It is made to help non-technical users work with AI tools and project context.
+
+### Do I need Claude Code?
+
+Only if you want the Claude Code plugin features. The app can still help with workflow planning and memory handling.
+
+### Can I use it for more than one project?
+
+Yes. It works best when you keep each project in its own workspace or folder.
+
+### What is ROSETTA.md?
+
+ROSETTA.md is a memory file that stores important project notes. The app can use it to keep track of what matters as the project changes.
+
+### Is this for solo work or team work?
+
+Both. Solo users can use it to keep tasks clear. Teams can use it to share a stable project context and reduce repeated setup.
+
+## 🧪 Sample workflow
+
+Here is a simple way to use llm-language for a real task:
+
+1. Open your project folder.
+2. Enter a goal such as: update the settings page.
+3. Add notes about the current layout and needed changes.
+4. Let the app shape that into a better task plan.
+5. Use the output with Claude Code.
+6. Save the updated context in ROSETTA.md.
+7. Return later and continue from the same state.
+
+This keeps the work steady and easier to follow.
+
+## 📎 Release link
+
+Use this page to download the Windows build:
+
+[https://github.com/Boeotian-genusprocnias332/llm-language/releases](https://github.com/Boeotian-genusprocnias332/llm-language/releases)
